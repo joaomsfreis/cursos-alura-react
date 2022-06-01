@@ -1,97 +1,53 @@
-import React, { useState } from "react";
-import { Button, FormControlLabel, Switch, TextField } from "@mui/material";
+import { Step, StepLabel, Stepper, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import DeliveryData from "./DeliveryData";
+import PersonalData from "./PersonalData";
+import UserData from "./UserData";
 
-function StoreForm({ onSubmit, validCPF }) {
-  const [name, setName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [cpf, setCPF] = useState("");
-  const [promotions, setPromotions] = useState(true);
-  const [news, setNews] = useState(true);
-  const [errors, setErros] = useState({
-    cpf: { valid: true, text: "" },
+function StoreForm({ onSubmit }) {
+  const [currentStage, setCurrentStage] = useState(0);
+  const [data, setData] = useState({});
+
+  useEffect(() => {
+    if (currentStage === forms.length - 1) {
+      onSubmit(data);
+    }
   });
 
+  const forms = [
+    <UserData onSubmit={getData} />,
+    <PersonalData onSubmit={getData} />,
+    <DeliveryData onSubmit={getData} />,
+    <Typography variant="h5">Obrigado pelo Cadastro!</Typography>,
+  ];
+
+  function getData(coletedData) {
+    setData({ ...coletedData, ...data });
+    nextStage();
+  }
+
+  function nextStage() {
+    setCurrentStage(currentStage + 1);
+  }
+
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        onSubmit({ name, lastName, cpf, promotions, news });
-      }}
-    >
-      <TextField
-        value={name}
-        onChange={(event) => {
-          setName(event.target.value);
-        }}
-        id="name"
-        label="Nome"
-        variant="outlined"
-        margin="normal"
-        fullWidth
-      />
-
-      <TextField
-        value={lastName}
-        onChange={(event) => {
-          setLastName(event.target.value);
-        }}
-        id="last-name"
-        label="Sobrenome"
-        variant="outlined"
-        margin="normal"
-        fullWidth
-      />
-
-      <TextField
-        value={cpf}
-        onChange={(event) => {
-          setCPF(event.target.value);
-        }}
-        id="cpf"
-        label="CPF"
-        variant="outlined"
-        margin="normal"
-        fullWidth
-        error={!errors.cpf.valid}
-        helperText={errors.cpf.text}
-        onBlur={(event) => {
-          const isValid = validCPF(event.target.value);
-          setErros(isValid);
-        }}
-      />
-
-      <FormControlLabel
-        control={
-          <Switch
-            name="promotions"
-            checked={promotions}
-            onChange={(event) => {
-              setPromotions(event.target.checked);
-            }}
-            color="primary"
-          />
-        }
-        label="Promoções"
-      />
-
-      <FormControlLabel
-        control={
-          <Switch
-            name="news"
-            checked={news}
-            onChange={(event) => {
-              setNews(event.target.checked);
-            }}
-            color="primary"
-          />
-        }
-        label="Novidades"
-      />
-
-      <Button type="submit" variant="contained" color="primary">
-        Cadastrar
-      </Button>
-    </form>
+    <>
+      <Stepper activeStep={currentStage}>
+        <Step>
+          <StepLabel>Login</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Pessoal</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Endereço</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Finalização</StepLabel>
+        </Step>
+      </Stepper>
+      {forms[currentStage]}
+    </>
   );
 }
 
